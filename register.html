@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register</title>
+  <style>
+    body { margin-left: auto;margin-right: auto; padding: 20px }
+    input { width: 90%; height: 32px; display: block; margin: 0 auto;margin-bottom: 1%;}
+    input[type=text], input[type=password] { padding: 16px; font-size: 24px }
+    input[type=button] { width: 90%; height: 48px }
+  </style>
+</head>
+<body>
+  <div width="100%">
+    <form onsubmit="send(event)">
+        <input type="text" name="studentcode" placeholder="Student ID" required>
+        <input type="text" name="name" placeholder="FirstName" required>
+        <input type="text" name="surname" placeholder="Lastname" required>
+        <!-- <input type="text" placeholder="Password" required> -->
+        <input type="button" value="Submit" id="btn">
+    </form>
+  </div>
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script src="https://code.jquery.com/jquery-2.2.4.min.js"> </script>
+  <!-- 2. script liff sdk -->    
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script>
+    const liffId = '1660843685-qV58OOyJ';
+    let userId = '';
+
+    function main(){
+    // 1.liff init
+    // 2.get profile
+    liff.init({liffId: liffId});
+    liff.ready.then(() => {
+        if(!liff.isLoggedIn()){
+            liff.login();
+        }        
+        liff.getProfile().then((profile) => {            
+            userId = profile.userId;
+            console.log(profile);
+        });
+      });    
+    }
+
+    main()
+
+    jQuery("#post").click(function () {
+        console.log("Button press")
+        submitForm()
+  
+    });
+
+    function submitForm() {
+        var url =
+          "https://script.google.com/macros/s/AKfycbwVo_21T6xZ4c9BQaSY57scva02T-f6NL7UkxKYbQPiDwpUm_nQtbGm2HsBCaTyFDpn/exec";
+        var studentcode = document.getElementsByName("studentcode")[0].value;
+        var name = document.getElementsByName("name")[0].value;
+        var surname = document.getElementsByName("surname")[0].value;
+        //console.log(typeof username);
+        var myHeaders = new Headers();
+        myHeaders.append("Content-Type", "text/plain");
+        var raw = `{"custid":"${userId}", "studentcode": ${studentcode}, "name": ${name}, "surname": ${surname}}`;
+
+        var requestOptions = {
+          method: "POST",
+          headers: myHeaders,
+          body: raw,
+          redirect: "follow",
+        };
+        var payload = {
+          studentcode: studentcode,
+          name: name,
+          surname: surname,
+        };
+        console.log(raw);
+
+        fetch(url, requestOptions)
+          .then((response) => response.text())
+          .then((result) => {
+            console.log(result);
+            const resultObj = JSON.parse(result);
+            var code = resultObj.code;
+            var message = resultObj.message;
+            var value = resultObj.value;
+            //console.log(resultObj.code)
+            //login case
+            if (value) {
+              liff.closeWindow();
+            }
+            alert(message);
+          })
+          .catch((error) => console.log("error", error));
+      }
+
+    
+  </script>
+</body>
+</html>
